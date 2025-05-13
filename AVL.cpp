@@ -130,9 +130,9 @@ int alturaNo(NO* no) {
     return no->altura;
 }
 
-int maior(int a, int b) {
-    if (a > b) return a;
-    return b;
+int maior(int altEsq, int altDir) {
+    if (altEsq > altDir) return altEsq;
+    return altDir;
 }
 
 int fatorBalanceamento(NO* no) {
@@ -140,43 +140,60 @@ int fatorBalanceamento(NO* no) {
     return alturaNo(no->esq) - alturaNo(no->dir);
 }
 
-NO* girarDireita(NO* y) {  
+NO* girarDireita(NO* no) {  
    /* Rotação simples à direita  
-             y                x  
-            / \              / \  
-           x   T3   =>      T1  y  
-          / \                  / \  
-        T1  T2               T2  T3  
+             no                aux  
+            /  \              /   \  
+          aux   T3   =>      T1    y  
+         /   \                   /  \  
+        T1   T2                 T2  T3  
    */  
 
-   // Passo 1: Armazene o filho esquerdo de 'y' em uma variável temporária 'x'.  
-   // Passo 2: Transfira a subárvore direita de 'x' para a subárvore esquerda de 'y'.  
-   // Passo 3: Atualize 'x' para ser o novo nó raiz da subárvore.  
-   // Passo 4: Recalcule as alturas dos nós afetados.  
-   // Passo 5: Retorne o novo nó raiz ('x').  
+   // Passo 1: Armazene o filho esquerdo de 'no' em uma variável temporária 'aux'.
+    NO* aux = no->esq;
 
-	// provisoriamente retorna o ponteiro passado como parâmetro
-	return y; 
+   // Passo 2: Transfira a subárvore direita de 'aux' para a subárvore esquerda de 'no'.  
+    no->esq = aux->dir;
+   
+   // Passo 3: Atualize 'aux' para ser o novo nó raiz da subárvore.
+    aux->dir = no;
+
+   // Passo 4: Recalcule as alturas dos nós afetados.
+    int altEsq = alturaNo(no->esq);
+    int altDir = alturaNo(no->dir);
+    no->altura = maior(altEsq, altDir) + 1;
+
+   // Passo 5: Retorne o novo nó raiz ('aux').  
+    return aux;
+
 }  
 
-NO* girarEsquerda(NO* x) {  
+NO* girarEsquerda(NO* no) {  
    /* Rotação simples à esquerda  
-           x                    y  
-          / \                  / \  
-         T1  y      =>        x  T3  
-            / \              / \  
-           T2 T3            T1 T2  
+            no                    aux  
+          /   \                 /   \  
+         T1   aux      =>      no    T3  
+             /   \           /   \  
+            T2   T3         T1   T2  
    */  
 
-   // Passo 1: Armazene o filho direito de 'x' em uma variável temporária 'y'.  
-   // Passo 2: Transfira a subárvore esquerda de 'y' para a subárvore direita de 'x'.  
-   // Passo 3: Atualize 'y' para ser o novo nó raiz da subárvore.  
-   // Passo 4: Recalcule as alturas dos nós afetados.  
-   // Passo 5: Retorne o novo nó raiz ('y').  
+   // Passo 1: Armazene o filho direito de 'no' em uma variável temporária 'aux'. 
+   NO* aux = no->dir;
 
+   // Passo 2: Transfira a subárvore esquerda de 'aux' para a subárvore direita de 'no'.
+   no->dir = aux->esq;
 
-    // provisoriamente retorna o ponteiro passado como parâmetro
-    return x; 
+   // Passo 3: Atualize 'aux' para ser o novo nó raiz da subárvore.
+   aux->esq = no;
+
+   // Passo 4: Recalcule as alturas dos nós afetados.
+   int altEsq = alturaNo(no->esq);
+   int altDir = alturaNo(no->dir);
+   no->altura = maior(altEsq, altDir) + 1;
+
+   // Passo 5: Retorne o novo nó raiz ('aux').  
+   return aux;
+
 }
 
 NO* insereArvore(NO* no, int valor) {
@@ -252,11 +269,11 @@ void exibirElementosArvore(NO* no, int espaco, bool direita) {
     for (int i = DIST; i < espaco; i++) cout << " ";
 
     if (direita)
-        cout << "/-- ";
+        cout << "-- ";
     else
-        cout << "\\-- ";
+        cout << "-- ";
 
-    cout << no->valor << endl;
+    cout << no->valor << "(" << no->altura << ")" << endl;
 
     // Exibe subárvore esquerda
     exibirElementosArvore(no->esq, espaco, false);
